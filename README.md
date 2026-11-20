@@ -12,7 +12,7 @@ I made these for my own enjoyment. Anyone is free to use them, change them or bu
 
 ![Dark Fantasy](docs/dark-fantasy.jpg)
 
-A menacing castle on a sheer sea cliff under an indigo and violet sky, with a watching red eye in the keep.
+Dark fantasy inspired: a castle on a sea cliff under an indigo and violet sky, with a red eye in the keep.
 
 Moving parts:
 - clouds and fog drift, and lightning strikes in the distance;
@@ -27,7 +27,7 @@ UI colours: moonlit steel, ash grey and ember red.
 
 ![Disco Elysium](docs/disco-elysium.jpg)
 
-Inspired by Disco Elysium: a frozen harbour town under a painted, expressionist sky, with an orange blast behind a cumulus bank.
+Disco Elysium inspired: a frozen harbour town under a painted, expressionist sky, with an orange blast behind a cumulus bank.
 
 Moving parts:
 - an aerostat drifts on spinning rotors, and the blast pulses;
@@ -38,7 +38,7 @@ Moving parts:
 
 UI colours: teal-black panels, cream text and an orange accent.
 
-Disco Elysium inspired. Not affiliated with ZA/UM, and no game assets are used: every shape is drawn in code.
+Not affiliated with ZA/UM, and no game assets are used: every shape is drawn in code.
 
 ## Install
 

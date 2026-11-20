@@ -5,12 +5,12 @@
     {
       "name": "dark-fantasy",
       "source": "./plugins/dark-fantasy",
-      "description": "Dark fantasy: a menacing castle on a sea cliff under a violet sky, with lightning, fog, waves, a bridge of torches and a knight by a campfire in a cave."
+      "description": "Dark fantasy inspired: a castle on a sea cliff under a violet sky, with lightning, fog, waves, a bridge of torches and a knight by a campfire in a cave."
     },
     {
       "name": "disco-elysium",
       "source": "./plugins/disco-elysium",
-      "description": "Inspired by Disco Elysium: a frozen harbour town under a painted expressionist sky, with an aerostat, cranes, smoke and a lit church."
+      "description": "Disco Elysium inspired: a frozen harbour town under a painted expressionist sky, with an aerostat, cranes, smoke and a lit church."
     }
   ]
 }
