@@ -38,7 +38,7 @@ Moving parts:
 
 UI colours: teal-black panels, cream text and an orange accent.
 
-This is a fan-made tribute. It is not affiliated with or endorsed by ZA/UM. It uses no game assets: every shape is drawn in code.
+Disco Elysium inspired. Not affiliated with ZA/UM, and no game assets are used: every shape is drawn in code.
 
 ## Install
 
