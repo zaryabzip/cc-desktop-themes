@@ -11,6 +11,11 @@
       "name": "disco-elysium",
       "source": "./plugins/disco-elysium",
       "description": "Disco Elysium inspired: a frozen harbour town under a painted expressionist sky, with an aerostat, cranes, smoke and a lit church."
+    },
+    {
+      "name": "silent-hill-2",
+      "source": "./plugins/silent-hill-2",
+      "description": "Silent Hill 2 inspired: an overlook above a fogged valley of pines, with an abandoned car, a flickering streetlight, falling ash and a turn to rust about once a minute."
     }
   ]
 }

@@ -40,9 +40,25 @@ UI colours: teal-black panels, cream text and an orange accent.
 
 Not affiliated with ZA/UM, and no game assets are used: every shape is drawn in code.
 
+### Silent Hill 2
+
+![Silent Hill 2](docs/silent-hill-2.jpg)
+
+Silent Hill 2 inspired: a parking lot on an overlook above a valley of pines lost in fog, with a man at the wall, an old sedan with its door open, and a grimy concrete building.
+
+Moving parts:
+- fog banks roll between the pines, and wisps creep along the wall;
+- the streetlight flickers, and ash drifts down;
+- the man at the wall shifts his weight;
+- about once a minute the world turns to rust: the pines die, the car rots, the road cracks, the building decays, and a creature walks in before it all fades back.
+
+UI colours: ash greys, bone-white text and a rust accent.
+
+Not affiliated with Konami, and no game assets are used: every shape is drawn in code, and the creature is an original design.
+
 ## Install
 
-Install one theme at a time. Both themes set the backdrop when a session starts, so with two enabled, whichever runs last wins.
+Install one theme at a time. Every theme sets the backdrop when a session starts, so with two enabled, whichever runs last wins.
 
 At the prompt of a Claude Code terminal session:
 
@@ -52,6 +68,10 @@ At the prompt of a Claude Code terminal session:
 
 ```
 /plugin install disco-elysium --marketplace zaryabzip/cc-desktop-themes
+```
+
+```
+/plugin install silent-hill-2 --marketplace zaryabzip/cc-desktop-themes
 ```
 
 Answer `y` to add the marketplace, then pick a scope (the user scope is first).
@@ -64,6 +84,10 @@ claude plugin install dark-fantasy --marketplace zaryabzip/cc-desktop-themes
 
 ```bash
 claude plugin install disco-elysium --marketplace zaryabzip/cc-desktop-themes
+```
+
+```bash
+claude plugin install silent-hill-2 --marketplace zaryabzip/cc-desktop-themes
 ```
 
 In the desktop app, where `/plugin` does not run: click **+** next to the prompt box, then **Plugins**, **Add marketplace** with `zaryabzip/cc-desktop-themes`, then **Add plugin**.
@@ -87,7 +111,7 @@ Swap the names to go the other way. Open sessions keep the theme they loaded: ru
 
 ## Make your own
 
-Start from either theme. `hooks/register.tsx` sets the colours and the backdrop; `hooks/scene.js` draws the scene. Keep the scene under 131,072 characters, the app's limit for a backdrop.
+Start from any theme. `hooks/register.tsx` sets the colours and the backdrop; `hooks/scene.js` draws the scene. Keep the scene under 131,072 characters, the app's limit for a backdrop.
 
 ## License
 
