@@ -203,14 +203,22 @@ function city() {
   }
   // Far haze towers in the middle distance: pale silhouettes.
   let x = 600
+  let farD = ''
+  let farBody = ''
   while (x < 1180) {
     const w = 24 + rng() * 46
     const top = 330 + rng() * 180
     far.rect('#b2c2ce', x, top, w, 600 - top)
     far.rect('#d2dce4', x + w - 4, top, 4, 600 - top)
+    farBody += `M${n0(x)} ${n0(top)}h${n0(w)}V600h${n0(-w)}z`
+    farD += `M${n0(x + 3)} ${n0(top + 4)}h${n0(w - 6)}V600h${n0(-(w - 6))}z`
     x += w + 2 + rng() * 8
   }
-  const farPats = `<rect x="600" y="330" width="580" height="270" fill="url(#cp-win-far)" opacity="0.6"/>`
+  // The window pattern sits on the towers only, not on the sky between them.
+  const farPats = `<path d="${farD}" fill="url(#cp-win-far)" opacity="0.6"/>`
+  // By night the far towers go dark, with a few dim lit windows.
+  const farNight = `<path d="${farBody}" fill="#1a2440" opacity="0.75"/>` +
+    `<path d="${farD}" fill="url(#cp-win-farnight)"/>`
   // The right cluster, drawn from the vanishing point outward: back row, then front.
   for (const [bx, top, w, c, kind] of [[1000, 300, 70, '#7a8ca0', 'grid'], [1070, 330, 60, '#5a6e88', 'screens'], [1380, 300, 80, '#4a5a78', 'screens'], [1520, 280, 90, '#6a7890', 'bands']]) tower(bx, top, w, 610, 10, c, kind)
   for (const [bx, top, w, side, kind, tiers, c] of [[1040, 270, 110, 18, 'screens', [], '#22304a'], [1150, 200, 92, 16, 'ribs', [[0.3, 0.8]], '#3a4660'], [1185, 360, 115, 16, 'bands', [], '#8a7a6a'], [1260, 236, 190, 28, 'screens', [[0.25, 0.85]], '#1e2a44'], [1460, 150, 160, 24, 'screens', [[0.2, 0.8], [0.45, 0.9]], '#24324e']]) tower(bx, top, w, 620, side, c, kind, tiers)
@@ -234,6 +242,7 @@ function city() {
   scaffold += 'M60 380V610M230 380V610M140 380V300M90 300H260M250 300v40'
   return {
     far: far.svg() + farPats,
+    farNight,
     body: out,
     pats: '',
     frame: frame + `<path d="${scaffold}" stroke="#2a2f36" stroke-width="4" fill="none"/>`,
@@ -637,6 +646,7 @@ export function buildScene() {
     <pattern id="cp-win-cool" width="9" height="8" patternUnits="userSpaceOnUse"><rect width="5" height="4" fill="#cfe6f2" opacity="0.55"/></pattern>
     <pattern id="cp-win-warm" width="9" height="8" patternUnits="userSpaceOnUse"><rect width="5" height="4" fill="#3a2e28" opacity="0.6"/></pattern>
     <pattern id="cp-win-far" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="4" height="3" fill="#dde8ee" opacity="0.6"/></pattern>
+    <pattern id="cp-win-farnight" width="24" height="18" patternUnits="userSpaceOnUse"><path d="M2 2h3v2h-3zM14 10h3v2h-3z" fill="#ffd27a"/><path d="M8 14h3v2h-3z" fill="#9fe8ff"/></pattern>
     <pattern id="cp-grid" width="9" height="8" patternUnits="userSpaceOnUse"><rect width="9" height="8" fill="#000" opacity="0.12"/><rect width="6" height="5" fill="#cfe6f2" opacity="0.32"/></pattern>
     <pattern id="cp-ribs" width="8" height="40" patternUnits="userSpaceOnUse"><rect width="2" height="40" fill="#000" opacity="0.28"/><rect x="2" width="1" height="40" fill="#fff" opacity="0.12"/><rect y="36" width="8" height="2" fill="#000" opacity="0.2"/></pattern>
     <pattern id="cp-bands" width="20" height="12" patternUnits="userSpaceOnUse"><rect y="8" width="20" height="4" fill="#000" opacity="0.3"/><rect y="2" width="14" height="5" fill="#ffe6c8" opacity="0.2"/></pattern>
@@ -651,6 +661,7 @@ export function buildScene() {
   </defs>
   ${sky()}
   <g opacity="0.8">${c.far}</g>
+  ${layer(NIGHT, c.farNight)}
   ${smog()}
   ${bridge()}
   ${c.body}
