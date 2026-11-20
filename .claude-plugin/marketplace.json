@@ -16,6 +16,11 @@
       "name": "silent-hill-2",
       "source": "./plugins/silent-hill-2",
       "description": "Silent Hill 2 inspired: an overlook above a fogged valley of pines, with an abandoned car, a flickering streetlight, falling ash and a turn to rust about once a minute."
+    },
+    {
+      "name": "cyberpunk-2077",
+      "source": "./plugins/cyberpunk-2077",
+      "description": "Cyberpunk 2077 inspired: a neon megacity seen from a dusty roadside, with a wedge sports car, flying cars and a looping day-to-night cycle."
     }
   ]
 }

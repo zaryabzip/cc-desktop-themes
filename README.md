@@ -56,6 +56,24 @@ UI colours: ash greys, bone-white text and a rust accent.
 
 Not affiliated with Konami, and no game assets are used: every shape is drawn in code, and the creature is an original design.
 
+### Cyberpunk 2077
+
+![Cyberpunk 2077 by day](docs/cyberpunk-2077.jpg)
+
+![Cyberpunk 2077 by night](docs/cyberpunk-2077-night.jpg)
+
+Cyberpunk 2077 inspired: a neon megacity seen from a dusty roadside, with a man leaning on a low wedge sports car.
+
+Moving parts:
+- the sky turns from day to dusk to night to dawn in a two-minute loop, with the sun and the moon crossing it;
+- at night thousands of windows light up, the streetlamp switches on, and the car's tail light and underglow come on;
+- flying cars cross the city, and some signs flicker;
+- a red light blinks on the bridge in the distance.
+
+UI colours: deep navy panels, cool white text and a neon cyan accent.
+
+Not affiliated with CD PROJEKT RED, and no game assets are used: every shape is drawn in code, and the city, signs, car and character are original designs.
+
 ## Install
 
 Install one theme at a time. Every theme sets the backdrop when a session starts, so with two enabled, whichever runs last wins.
@@ -74,6 +92,10 @@ At the prompt of a Claude Code terminal session:
 /plugin install silent-hill-2 --marketplace zaryabzip/cc-desktop-themes
 ```
 
+```
+/plugin install cyberpunk-2077 --marketplace zaryabzip/cc-desktop-themes
+```
+
 Answer `y` to add the marketplace, then pick a scope (the user scope is first).
 
 From a shell:
@@ -88,6 +110,10 @@ claude plugin install disco-elysium --marketplace zaryabzip/cc-desktop-themes
 
 ```bash
 claude plugin install silent-hill-2 --marketplace zaryabzip/cc-desktop-themes
+```
+
+```bash
+claude plugin install cyberpunk-2077 --marketplace zaryabzip/cc-desktop-themes
 ```
 
 In the desktop app, where `/plugin` does not run: click **+** next to the prompt box, then **Plugins**, **Add marketplace** with `zaryabzip/cc-desktop-themes`, then **Add plugin**.
