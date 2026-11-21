@@ -74,6 +74,22 @@ UI colours: deep navy panels, cool white text and a neon cyan accent.
 
 Not affiliated with CD PROJEKT RED, and no game assets are used: every shape is drawn in code, and the city, signs, car and character are original designs.
 
+### Village
+
+![Village](docs/village.jpg)
+
+Resident Evil Village inspired: a snowbound mountain valley in a storm, with a gothic castle high on a ridge, a village in the fog below it and a windmill among the firs.
+
+Moving parts:
+- snow falls in two layers, and the windmill's sails turn;
+- fog drifts through the castle, the town and the valley, and clouds move slowly;
+- the low light in the mountain pass slowly brightens and dims;
+- chimney smoke drifts, and a few castle windows flicker.
+
+UI colours: cold slate panels, frost-white text and a lamplight gold accent.
+
+Not affiliated with Capcom, and no game assets are used: every shape is drawn in code, and the castle, the village and the mill are original designs.
+
 ## Install
 
 Install one theme at a time. Every theme sets the backdrop when a session starts, so with two enabled, whichever runs last wins.
@@ -96,6 +112,10 @@ At the prompt of a Claude Code terminal session:
 /plugin install cyberpunk-2077 --marketplace zaryabzip/cc-desktop-themes
 ```
 
+```
+/plugin install village --marketplace zaryabzip/cc-desktop-themes
+```
+
 Answer `y` to add the marketplace, then pick a scope (the user scope is first).
 
 From a shell:
@@ -114,6 +134,10 @@ claude plugin install silent-hill-2 --marketplace zaryabzip/cc-desktop-themes
 
 ```bash
 claude plugin install cyberpunk-2077 --marketplace zaryabzip/cc-desktop-themes
+```
+
+```bash
+claude plugin install village --marketplace zaryabzip/cc-desktop-themes
 ```
 
 In the desktop app, where `/plugin` does not run: click **+** next to the prompt box, then **Plugins**, **Add marketplace** with `zaryabzip/cc-desktop-themes`, then **Add plugin**.

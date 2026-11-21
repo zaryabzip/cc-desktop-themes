@@ -1,6 +1,8 @@
 {
   "name": "cc-desktop-themes",
-  "owner": { "name": "zaryabzip" },
+  "owner": {
+    "name": "zaryabzip"
+  },
   "plugins": [
     {
       "name": "dark-fantasy",
@@ -21,6 +23,11 @@
       "name": "cyberpunk-2077",
       "source": "./plugins/cyberpunk-2077",
       "description": "Cyberpunk 2077 inspired: a neon megacity seen from a dusty roadside, with a wedge sports car, flying cars and a looping day-to-night cycle."
+    },
+    {
+      "name": "village",
+      "source": "./plugins/village",
+      "description": "Resident Evil Village inspired: a snowbound valley in a storm, with a gothic castle on a ridge, a village in the fog, a turning windmill and falling snow."
     }
   ]
 }
