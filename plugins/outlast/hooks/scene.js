@@ -13,7 +13,9 @@
 //
 // Cost: no filters. Every animation steps on one shared clock (24 ticks a second;
 // slow drifts every half second), so changes from all parts land on the same frames
-// and the browser never draws more than 24 frames a second. All motion is SMIL and
+// and the browser never draws more than 24 frames a second.
+// Rain, the runners and the searchlight move on every tick: at 12 a second they
+// looked jittery. All motion is SMIL and
 // every colour a presentation attribute: the desktop app draws the scene in a
 // script-less frame.
 
@@ -443,7 +445,7 @@ function asylum() {
 // grounds: a long pale wedge, swinging back and forth.
 function guardTower() {
   const beam = `<path d="M0 0L1500 -95L1500 95Z" fill="url(#o-beam)"/>`
-  const sweep = ticked('transform', 'rotate', 18, 2, (u) => n1(210 + 40 * (1 - Math.cos(u * Math.PI * 2)) / 2))
+  const sweep = ticked('transform', 'rotate', 18, 1, (u) => n1(210 + 40 * (1 - Math.cos(u * Math.PI * 2)) / 2))
   return `<g transform="translate(1474 404)"><g>${sweep}${beam}</g></g>` +
     `<path d="M1452 660L1460 420H1488L1496 660Z" fill="#14171c"/>` +
     `<path d="M1460 470l28 40M1488 470l-28 40M1460 540l28 40M1488 540l-28 40" stroke="#22262d" stroke-width="2"/>` +
@@ -469,7 +471,7 @@ function grounds() {
 // Inmates running across the lawn behind the fence, each on its own cycle: hidden,
 // then sprinting from one side to the other in a four-pose stride, then gone.
 function runner(dur, t0, t1, x0, x1, y, wild, s = 1) {
-  const step = 2 // move every 2 ticks
+  const step = 1 // move every tick
   const n = Math.round(((t1 - t0) * FPS) / step)
   const pos = [[0, `${x0} ${y}`]]
   for (let i = 0; i <= n; i++) pos.push([t0 + (i * step) / FPS, `${n1(x0 + ((x1 - x0) * i) / n)} ${y}`])
@@ -697,7 +699,7 @@ function foreground() {
 
 // Rain: sheets of slanted streaks, each a tile copied along its fall, so one move
 // loops seamlessly. A brighter sheet shows only inside the headlight beams.
-function rainSheet(seed, n, len, color, op, width, tileH, dx, dur, clip = '', step = 2) {
+function rainSheet(seed, n, len, color, op, width, tileH, dx, dur, clip = '', step = 1) {
   const rng = mulberry32(seed)
   let d = ''
   for (let i = 0; i < n; i++) {
