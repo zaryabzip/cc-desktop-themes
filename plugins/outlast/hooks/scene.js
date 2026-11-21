@@ -8,8 +8,8 @@
 // of them lit. A guard tower's searchlight sweeps the grounds. At the half-open gate
 // an abandoned jeep still has its headlights on. Rain falls; now and then lightning
 // lights the sky. About once a minute the camera switches to night vision: the
-// world goes green and grainy, and things that were not there show at the fence and
-// in a dark window.
+// world goes green and grainy, and a figure that was not there stands at the fence.
+// Inmates run across the lawn and, inside, past the lit windows.
 //
 // Cost: no filters. Every animation steps on one shared clock (24 ticks a second;
 // slow drifts every half second), so changes from all parts land on the same frames
@@ -250,8 +250,8 @@ const lightningAll = () =>
 // The asylum on its rise: a long symmetrical Victorian institution. A centre block
 // with a clock tower and a lit doorway; inner wings under mansard roofs with
 // dormers and chimneys; end pavilions with steep pyramid roofs and iron cresting;
-// low outer wings. Rows of barred windows, a few lit, one flickering; a figure
-// passes behind one of them now and then.
+// low outer wings. Rows of barred windows, a few lit, one flickering; inmates
+// run past the lit corridors inside.
 const BASE = 522
 function asylum() {
   const wall = []
@@ -264,7 +264,11 @@ function asylum() {
   let wins = ''
   let lit = ''
   const R = (list, x, y, w, h) => list.push(`M${n1(x)} ${n1(y)}h${n1(w)}v${n1(h)}h${n1(-w)}z`)
-  const litAt = new Set(['c1-2', 'w2-5', 'e1-9', 'e2-3', 'p0-1', 'w1-11'])
+  // Three lit corridors (runs of lit windows side by side) where inmates are seen
+  // running inside, and a few single lit windows.
+  const CORRIDORS = [['c2', 896, 26, 392, 3, 6], ['e2', 1134, 22, 422, 2, 6], ['w3', 654, 22, 478, 5, 8]]
+  const litAt = new Set(['c1-2', 'w2-5', 'e1-9', 'p0-1', 'w1-11'])
+  for (const [key, , , , a, b] of CORRIDORS) for (let i = a; i <= b; i++) litAt.add(`${key}-${i}`)
   // A row of windows across a span.
   const wr = mulberry32(19)
   const darkAt = []
@@ -396,11 +400,26 @@ function asylum() {
     '<path d="M942 522h116v6h-116zM934 528h132v6h-132zM926 534h148v6h-148z" fill="#2c3038"/><path d="M1000 410v8" stroke="#2b3039" stroke-width="2"/><circle cx="1000" cy="428" r="5" fill="#1a1d22"/>'
   const lamp = `<circle cx="1000" cy="462" r="4" fill="#ffe7a8"/>${blob('o-lamp', 1000, 466, 60, 50, 0.8)}`
   const lampFx = `<g>${timeline('opacity', 7, [[0, 1], [2, 0.3], [2 + 2 * TICK, 1], [2 + 5 * TICK, 0.2], [2 + 7 * TICK, 1], [5.5, 0.6], [5.5 + 3 * TICK, 1]])}${lamp}</g>`
-  // A figure passing behind a lit window of the east wing, now and then.
-  const fx = 1120 + 14 + 9 * 22
-  const figure = `<clipPath id="o-win"><path d="M${fx - 6} 377V361a6 6 0 0 1 12 0V377Z"/></clipPath>` +
-    `<g clip-path="url(#o-win)"><g>${timeline('transform', 30, [[0, '-20 0'], [12, '-12 0'], [12 + 0.25, '-9 0'], [12 + 0.5, '-6 0'], [12 + 0.75, '-3 0'], [13, '0 0'], [13.25, '3 0'], [13.5, '6 0'], [13.75, '9 0'], [14, '12 0'], [14.25, '20 0']], 'translate')}` +
-    `<path d="M${fx - 3} 377v-12a3 3 0 0 1 -1 -2a4 4 0 1 1 8 0a3 3 0 0 1 -1 2v12z" fill="#0d0d0c"/></g></g>`
+  // Inmates running inside: dark silhouettes crossing each corridor's lit windows,
+  // seen only through the glass, one way and then, later, the other.
+  const shape = '<path d="M-1 -11L1 -5M1 -5L-3 0M1 -5L4 -1M-1 -10L-5 -8M0 -10L4 -12" fill="none" stroke="#140f08" stroke-width="2.6" stroke-linecap="round"/><circle cx="-0.5" cy="-13.5" r="2.6" fill="#140f08"/>'
+  let inside = ''
+  CORRIDORS.forEach(([key, x0, step, y, a, b], ci) => {
+    const xa = x0 + a * step - 10
+    const xb = x0 + b * step + 10
+    let clip = ''
+    for (let i = a; i <= b; i++) clip += `M${x0 + i * step - 6} ${y + 11}V${y - 5}a6 6 0 0 1 12 0V${y + 11}Z`
+    const dur = [13, 17, 23][ci]
+    const cross = (t0, dir, wild) => {
+      const n = Math.round(((xb - xa) / 80) * FPS)
+      const xs = [[0, dir > 0 ? xa - 8 : xb + 8]]
+      for (let i = 0; i <= n; i++) xs.push([t0 + i / FPS, n0(dir > 0 ? xa + ((xb - xa) * i) / n : xb - ((xb - xa) * i) / n)])
+      const bob = wild ? ' transform="rotate(-12)"' : ''
+      return `<g>${timeline('', dur, xs.map(([t, v]) => [t, `${v}`]), 'translate')}<g transform="scale(${dir} 1)"><g${bob}>${shape}</g></g></g>`
+    }
+    inside += `<clipPath id="o-cor${ci}"><path d="${clip}"/></clipPath><g clip-path="url(#o-cor${ci})"><g transform="translate(0 ${y + 11})">` +
+      cross(2 + ci * 3, 1, ci === 1) + cross(dur / 2 + 1 + ci, -1, ci !== 1) + '</g></g>'
+  })
   // Windows whose lights buzz and stutter, each on its own cycle: on for a while,
   // stuttering, off, and back.
   const fr = mulberry32(88)
@@ -434,7 +453,7 @@ function asylum() {
     `<path d="${trim.join('')}" fill="#2b3039"/><path d="${dent.join('')}" fill="url(#o-dent)"/>` +
     `<path d="${crest}" stroke="#2b3039" stroke-width="1.5"/>` +
     `<path d="${rim.join('')}" fill="none" stroke="#4a5566" stroke-width="1.4" opacity="0.7"/>` +
-    `<g opacity="0.8">${stains}</g>` + wins + `<g>${surge}${halos}${lit}${buzz}</g>` + flick + figure + clock + door + `<g>${surge}${lampFx}</g>` +
+    `<g opacity="0.8">${stains}</g>` + wins + `<g>${surge}${halos}${lit}${buzz}${inside}</g>` + flick + clock + door + `<g>${surge}${lampFx}</g>` +
     `<path d="${ivy}" fill="#121a14" opacity="0.85"/><path d="${ivy}" fill="url(#o-ivy)"/>` +
     `<path d="${iron.join('')}" fill="none" stroke="#434a55" stroke-width="2"/>` +
     // Rain-dark streaks down the walls, and the haze between us and the building.
@@ -468,22 +487,45 @@ function grounds() {
     `<g>${stepDrift(70, 0, 60)}${blob('o-fog', 700, 560, 460, 30, 0.5)}${blob('o-fog', 1250, 555, 380, 26, 0.45)}</g>`
 }
 
-// Inmates running across the lawn behind the fence, each on its own cycle: hidden,
-// then sprinting from one side to the other in a four-pose stride, then gone.
-function runner(dur, t0, t1, x0, x1, y, wild, s = 1) {
-  const step = 1 // move every tick
-  const n = Math.round(((t1 - t0) * FPS) / step)
-  const pos = [[0, `${x0} ${y}`]]
-  for (let i = 0; i <= n; i++) pos.push([t0 + (i * step) / FPS, `${n1(x0 + ((x1 - x0) * i) / n)} ${y}`])
-  pos.push([t1 + step / FPS, `${x0} ${y}`])
-  const vis = timeline('opacity', dur, [[0, 0], [t0, 1], [t1 + step / FPS, 0]])
-  const flip = x1 < x0 ? -s : s
+// Inmates running across the lawn behind the fence. None appears from nothing: each
+// runs in from beyond the frame's edge (behind the pines) or bursts out of the dark
+// front door, and runs off the edge or into the doorway. `path` is a list of
+// points; the runner keeps a steady pace along it, a step every tick, in a
+// four-pose stride. At the doorway it fades in or out of the dark, over six ticks.
+function runner(dur, t0, path, wild, s, fadeIn = false, fadeOut = false) {
+  const speed = 140 // px a second
+  const segs = []
+  let total = 0
+  for (let i = 1; i < path.length; i++) {
+    const len = Math.hypot(path[i][0] - path[i - 1][0], path[i][1] - path[i - 1][1])
+    segs.push([path[i - 1], path[i], total, len])
+    total += len
+  }
+  const n = Math.round((total / speed) * FPS)
+  const at = (d) => {
+    const [p0, p1, start, len] = segs.find(([, , st, l]) => d <= st + l + 1e-6) || segs[segs.length - 1]
+    const u = Math.min(1, (d - start) / len)
+    return [p0[0] + (p1[0] - p0[0]) * u, p0[1] + (p1[1] - p0[1]) * u]
+  }
+  const t1 = t0 + n / FPS
+  // A level path needs only x in each step; its height goes on a parent.
+  const level = path.every(([, y]) => y === path[0][1])
+  const xy = (p) => (level ? `${n0(p[0])}` : p.map(n0).join(' '))
+  const pos = [[0, xy(path[0])]]
+  for (let i = 0; i <= n; i++) pos.push([t0 + i / FPS, xy(at((total * i) / n))])
+  const fade = (from, to, start) => Array.from({ length: 6 }, (_, k) => [start + k / FPS, n2(from + ((to - from) * (k + 1)) / 6)])
+  const vis = [[0, 0], ...(fadeIn ? fade(0, 1, t0) : [[t0, 1]]), ...(fadeOut ? fade(1, 0, t1 - 6 / FPS) : [[t1 + 1 / FPS, 0]])]
+  const flip = path[path.length - 1][0] < path[0][0] ? -s : s
   // The stride: each pose shown in turn, three ticks each.
   const pose = (k) => `<g opacity="${k ? 0 : 1}">${timeline('opacity', 0.5, k ? [[0, 0], [k * 0.125, 1], [(k + 1) * 0.125, 0]].slice(0, k === 3 ? 2 : 3) : [[0, 1], [0.125, 0]])}<use href="#${wild ? 'j' : 'i'}${k}"/></g>`
-  return `<g opacity="0">${vis}<g>${timeline('', dur, pos, 'translate')}<g transform="scale(${flip} ${s})">${pose(0)}${pose(1)}${pose(2)}${pose(3)}</g></g></g>`
+  return `<g opacity="0"${level ? ` transform="translate(0 ${path[0][1]})"` : ''}>${timeline('opacity', dur, vis)}<g>${timeline('', dur, pos, 'translate')}<g transform="scale(${flip} ${s})">${pose(0)}${pose(1)}${pose(2)}${pose(3)}</g></g></g>`
 }
 function inmates() {
-  return runner(31, 5, 12, 470, 1450, 552, false, 0.62) + runner(43, 20, 27.5, 1490, 520, 556, true, 0.66) + runner(23, 14, 16.5, 1060, 1310, 542, false, 0.56) + runner(53, 36, 41, 640, 860, 548, true, 0.6)
+  const door = [1000, 527]
+  return runner(37, 5, [[-40, 554], [1640, 554]], false, 0.62) +
+    runner(47, 22, [[1640, 556], [-40, 556]], true, 0.66) +
+    runner(29, 3, [door, [1090, 540], [1640, 546]], false, 0.52, true) +
+    runner(53, 30, [[-40, 548], [880, 540], door], true, 0.55, false, true)
 }
 
 // The fence: posts, chain-link panels, razor wire along the top, a half-open gate
@@ -725,23 +767,24 @@ function rain() {
 // ---------------------------------------------------------------- the camcorder
 
 // Night vision: the world goes green and grainy for a while each minute. In it, a
-// figure stands at the fence by the gate, and eyes shine in a dark window.
+// figure stands at the fence by the gate.
 function nightVision() {
   const rng = mulberry32(5)
+  // The grain: a tile of specks, repeated over the frame.
   let grain = ''
-  for (let i = 0; i < 700; i++) grain += `M${n0(rng() * W)} ${n0(rng() * H)}h${n0(1 + rng() * 2)}v1h${-n0(1 + rng() * 2)}z`
+  for (let i = 0; i < 90; i++) grain += `M${n0(rng() * 211)} ${n0(rng() * 157)}h${n0(1 + rng() * 2)}v1h${-n0(1 + rng() * 2)}z`
   const shimmer = ticked('transform', 'translate', 1, 2, (u) => `${n0((u * 997) % 7) - 3} ${n0((u * 613) % 7) - 3}`)
   const stalker = `<g transform="translate(940 ${FB})"><path d="M-9 0L-7 -46Q-12 -70 -6 -84Q-10 -92 -6 -100Q0 -108 6 -100Q10 -92 6 -84Q12 -70 7 -46L9 0H4L2 -40H-2L-4 0Z" fill="#b9ffc4" opacity="0.55"/>` +
     `<circle cx="-2.5" cy="-95" r="1.6" fill="#ffffff"/><circle cx="2.5" cy="-95" r="1.6" fill="#ffffff"/></g>`
-  const eyes = `<circle cx="1222" cy="420" r="1.8" fill="#ffffff"/><circle cx="1228" cy="420" r="1.8" fill="#ffffff"/>${blob('o-eye', 1225, 420, 14, 8, 0.8)}`
   return `<g opacity="0">${nvIn()}` +
     `<rect width="${W}" height="${H}" fill="#0a2412" opacity="0.28"/>` +
     `<rect width="${W}" height="${H}" fill="#5fd47a" opacity="0.16"/>` +
-    stalker + eyes +
-    `<g>${shimmer}<path d="${grain}" fill="#c8ffd0" opacity="0.2"/></g>` +
+    stalker +
+    `<pattern id="o-grain" width="211" height="157" patternUnits="userSpaceOnUse"><path d="${grain}" fill="#c8ffd0"/></pattern>` +
+    `<g>${shimmer}<rect x="-8" y="-8" width="${W + 16}" height="${H + 16}" fill="url(#o-grain)" opacity="0.2"/></g>` +
     `<rect width="${W}" height="${H}" fill="url(#o-nvig)"/></g>` +
     // The burst of static at each switch.
-    `<g opacity="0">${nvGlitch()}<rect width="${W}" height="${H}" fill="#9aa59c" opacity="0.5"/><path d="${grain}" fill="#ffffff" transform="translate(3 -2)"/>` +
+    `<g opacity="0">${nvGlitch()}<rect width="${W}" height="${H}" fill="#9aa59c" opacity="0.5"/><rect width="${W}" height="${H}" fill="url(#o-grain)"/>` +
     `<path d="M0 300h${W}v14H0zM0 610h${W}v8H0z" fill="#e8f0ea" opacity="0.5"/></g>`
 }
 
@@ -796,7 +839,6 @@ export function buildScene() {
     <linearGradient id="o-stain" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a0b0d" stop-opacity="0.7"/><stop offset="1" stop-color="#0a0b0d" stop-opacity="0"/></linearGradient>
     <linearGradient id="o-refl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d4bd80" stop-opacity="0.5"/><stop offset="1" stop-color="#d4bd80" stop-opacity="0"/></linearGradient>
     <linearGradient id="o-mudside" x1="0" y1="0" x2="0" y2="1"><stop offset="0.3" stop-color="#3a3026" stop-opacity="0"/><stop offset="1" stop-color="#3a3026" stop-opacity="0.6"/></linearGradient>
-    <radialGradient id="o-eye"><stop offset="0" stop-color="#ffffff" stop-opacity="0.7"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></radialGradient>
     <linearGradient id="o-beam" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#e8eeff" stop-opacity="0.45"/><stop offset="1" stop-color="#e8eeff" stop-opacity="0"/></linearGradient>
     <linearGradient id="o-head" gradientUnits="userSpaceOnUse" x1="615" y1="0" x2="1080" y2="0"><stop offset="0" stop-color="#f4f2e6" stop-opacity="0.55"/><stop offset="1" stop-color="#f4f2e6" stop-opacity="0"/></linearGradient>
     <radialGradient id="o-pool"><stop offset="0" stop-color="#e8e4d4" stop-opacity="0.35"/><stop offset="1" stop-color="#e8e4d4" stop-opacity="0"/></radialGradient>

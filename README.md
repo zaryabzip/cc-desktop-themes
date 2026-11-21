@@ -102,7 +102,7 @@ Moving parts:
 - rain falls, brighter in the beams of an abandoned jeep's headlights, and ripples cross the puddles;
 - lightning strikes, and a guard tower's searchlight sweeps the grounds;
 - windows buzz and stutter, a power surge now and then blacks out the whole building, and a figure passes behind a lit window;
-- inmates in hospital gowns sprint across the lawn behind the fence;
+- inmates in hospital gowns sprint across the lawn behind the fence, in from the frame's edge or out of the front door, and silhouettes run past the lit windows inside;
 - the camcorder shows REC, a running timecode and a draining battery, and about once a minute it switches to night vision, where something waits at the fence.
 
 UI colours: near-black panels, cold grey text and a night-vision green accent.
