@@ -3,7 +3,8 @@
 // building, the signs, the jeep and the figures are drawn for it, the asylum has no
 // name, and the camcorder overlay is a generic one.
 //
-// A long Victorian institution stands on a rise behind a chain-link fence: a clock
+// A radio mast with blinking red lights stands on the ridge to the west. A long
+// Victorian institution stands on a rise behind a chain-link fence: a clock
 // tower over the centre, mansard-roofed wings, end pavilions, barred windows, a few
 // of them lit. A guard tower's searchlight sweeps the grounds. At the half-open gate
 // an abandoned jeep still has its headlights on. Rain falls; now and then lightning
@@ -154,27 +155,64 @@ function grassShape(seed) {
   return `<path d="${d}"/>`
 }
 
-// An inmate in a hospital gown, about 44 units tall, feet at (0, 0), facing right:
-// four poses of a running stride. `wild` raises the arms over the head.
+// An inmate in a hospital gown, about 44 units tall, feet at (0, 0), facing right,
+// as a solid silhouette: tapered limbs with rounded joints, a gown with a ragged
+// hem, a head with matted hair, the body leaning into the run. Four poses of the
+// stride; `wild` throws the arms up. Limbs and head take the placed fill; the gown
+// takes the placed colour (currentColor), so the same shape serves as a figure on
+// the lawn and as a black shape against a lit window.
 function inmatePose(k, wild) {
-  // Leg and arm swing for this pose: +1 front, -1 back, 0 passing.
-  const sw = [1, 0, -1, 0][k]
-  const lift = [0, 3, 0, 3][k]
-  const hip = [0, -24 - lift]
-  const foot = (s) => [s * 11, -lift * (s > 0 ? 0 : 1) - (sw === 0 && s < 0 ? 6 : 0)]
-  const legA = foot(sw || 0.3)
-  const legB = foot(-(sw || 0.3))
-  const knee = (f) => [(hip[0] + f[0]) / 2 + 3, (hip[1] + f[1]) / 2 - 1]
-  // The body leans into the run; a wild one throws its arms out and up, bent.
-  const sh = [7, -36 - lift]
-  const arm = (s) => (wild ? [sh[0] + s * 10, sh[1] - 4 - (s > 0 ? 4 : 0)] : [sh[0] - s * 9, sh[1] + 12])
-  const hand = (s) => (wild ? [sh[0] + s * 13 + 4, sh[1] - 15 + (s > 0 ? -3 : 4)] : [sh[0] - s * 13 + 4, sh[1] + 6])
-  const P = (a) => a.map(n1).join(' ')
-  const limbs = `M${P(hip)}L${P(knee(legA))}L${P(legA)}M${P(hip)}L${P(knee(legB))}L${P(legB)}` +
-    `M${P(sh)}L${P(arm(sw || 0.4))}L${P(hand(sw || 0.4))}M${P(sh)}L${P(arm(-(sw || 0.4)))}L${P(hand(-(sw || 0.4)))}`
-  const gown = `M${n1(sh[0] - 6)} ${n1(sh[1] + 1)}L${n1(sh[0] + 6)} ${n1(sh[1] + 1)}L${n1(hip[0] + 8)} ${n1(hip[1] + 8)}L${n1(hip[0] - 7)} ${n1(hip[1] + 9)}Z`
-  return `<path d="${limbs}" fill="none" stroke="#5d6269" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>` +
-    `<path d="${gown}" fill="#7c8187"/><circle cx="${n1(sh[0] + 3)}" cy="${n1(sh[1] - 5)}" r="4.6" fill="#6d6f70"/>`
+  const rad = (d) => (d * Math.PI) / 180
+  const to = ([x, y], a, l) => [x + Math.sin(rad(a)) * l, y + Math.cos(rad(a)) * l]
+  // [thigh, knee bend] for the near (A) and far (B) leg, degrees from straight down.
+  const legs = [[[38, 14], [-30, 72]], [[6, 4], [24, 105]], [[-30, 72], [38, 14]], [[24, 105], [6, 4]]][k]
+  const reach = ([t, b]) => 12 * Math.cos(rad(t)) + 12 * Math.cos(rad(t - b))
+  const hip = [0, -Math.max(reach(legs[0]), reach(legs[1]))]
+  const lean = 18
+  const sh = to(hip, 180 - lean, 14)
+  const limb = (p0, p1, w0, w1) => {
+    const dx = p1[0] - p0[0]
+    const dy = p1[1] - p0[1]
+    const l = Math.hypot(dx, dy) || 1
+    const nx = -dy / l
+    const ny = dx / l
+    const pts2 = [[p0[0] + nx * w0, p0[1] + ny * w0], [p1[0] + nx * w1, p1[1] + ny * w1], [p1[0] - nx * w1, p1[1] - ny * w1], [p0[0] - nx * w0, p0[1] - ny * w0]]
+    return 'M' + pts2.map((q) => q.map(n1).join(' ')).join('L') + `ZM${n1(p1[0] - w1)} ${n1(p1[1])}a${n1(w1)} ${n1(w1)} 0 1 0 ${n1(w1 * 2)} 0a${n1(w1)} ${n1(w1)} 0 1 0 ${n1(-w1 * 2)} 0`
+  }
+  const leg = ([t, b]) => {
+    const knee = to(hip, t, 12)
+    const ankle = to(knee, t - b, 12)
+    const toe = to(ankle, t - b + 95, 4)
+    return limb(hip, knee, 3, 2.2) + limb(knee, ankle, 2.2, 1.4) + limb(ankle, toe, 1.4, 1)
+  }
+  // Arms swing against the legs, elbows bent; or, wild, thrown up and out.
+  const arm = (swing, up) => {
+    const ua = wild ? (up ? 140 : -125) : -swing * 1.1
+    const elbow = to(sh, ua, 9)
+    const hand = to(elbow, wild ? (up ? 178 : -95) : ua + 88, 8)
+    return limb(sh, elbow, 2.2, 1.7) + limb(elbow, hand, 1.7, 1.2)
+  }
+  const near = leg(legs[0]) + arm(legs[1][0], true)
+  const far = leg(legs[1]) + arm(legs[0][0], false)
+  // The gown: shoulders to a ragged hem below the hip.
+  const side = (p, w) => [[p[0] - Math.cos(rad(lean)) * w, p[1] - Math.sin(rad(lean)) * w], [p[0] + Math.cos(rad(lean)) * w, p[1] + Math.sin(rad(lean)) * w]]
+  // The gown: narrow at the shoulders, wider and ragged at the hem, its sides
+  // curving with the body.
+  const [sl, sr] = side(sh, 3.6)
+  const waist = to(hip, 180 - lean, 5)
+  const [wl, wr] = side(waist, 3.9)
+  const hem = to(hip, -lean, 4)
+  const [hl, hr] = side(hem, 5)
+  const P = (q) => q.map(n1).join(' ')
+  const gown = `M${P(sl)}L${P(sr)}Q${P(wr)} ${P(hr)}L${P([hr[0] - 1.6, hr[1] - 1.2])}L${P([hr[0] - 3.2, hr[1] + 0.8])}L${P([(hl[0] + hr[0]) / 2, hem[1] - 0.8])}L${P([hl[0] + 2.4, hl[1] + 1.2])}L${P(hl)}Q${P(wl)} ${P(sl)}Z`
+  // The neck, the head, and lank hair hanging down the back of it.
+  const head = to(sh, 180 - lean + 8, 5.4)
+  const neck = limb(sh, to(sh, 180 - lean + 8, 3), 1.4, 1.3)
+  const hx = head[0]
+  const hy = head[1]
+  const hair = `M${n1(hx + 2.4)} ${n1(hy - 3)}Q${n1(hx - 1)} ${n1(hy - 5.6)} ${n1(hx - 3.6)} ${n1(hy - 1.6)}L${n1(hx - 5)} ${n1(hy + 4)}L${n1(hx - 3.6)} ${n1(hy + 2.4)}L${n1(hx - 3.4)} ${n1(hy + 5)}L${n1(hx - 2.2)} ${n1(hy + 1.6)}L${n1(hx - 1.2)} ${n1(hy + 3.6)}L${n1(hx - 0.8)} ${n1(hy - 1.4)}Z`
+  return `<path d="${far}" opacity="0.7"/><path d="${gown}" fill="currentColor"/>` +
+    `<path d="${near}${neck}M${n1(hx - 3)} ${n1(hy)}a3 3.6 0 1 0 6 0a3 3.6 0 1 0 -6 0"/><path d="${hair}" opacity="0.6"/>`
 }
 
 function symbols() {
@@ -217,6 +255,7 @@ function sky() {
     `<g>${stepDrift(80, 0, 90)}${drift}</g>` +
     lightningSky() +
     `<path d="M${pts(farR)}L1600 620L0 620Z" fill="#121822"/>` +
+    radioTower() +
     `<path d="M${pts(nearR)}L1600 620L0 620Z" fill="#0d1219"/>`
 }
 
@@ -238,12 +277,36 @@ function lightningSky() {
     return `<rect width="${W}" height="520" fill="url(#o-flash)" opacity="0">${timeline('opacity', dur, flash)}</rect>` +
       `<path d="${d}${fork}" fill="none" stroke="#e6ecff" stroke-width="2.4" opacity="0">${timeline('opacity', dur, bolt)}</path>`
   }
-  return strike(23, 9, 300, 11) + strike(37, 21, 1180, 12)
+  return strike(23, 9, 560, 11) + strike(37, 21, 1180, 12)
 }
 // The same strikes light the whole scene a little.
 const lightningAll = () =>
   `<rect width="${W}" height="${H}" fill="#a8b8d8" opacity="0">${timeline('opacity', 23, [[0, 0], [9, 0.14], [9 + 2 * TICK, 0.03], [9 + 4 * TICK, 0.1], [9 + 7 * TICK, 0]])}</rect>` +
   `<rect width="${W}" height="${H}" fill="#a8b8d8" opacity="0">${timeline('opacity', 37, [[0, 0], [21, 0.14], [21 + 2 * TICK, 0.03], [21 + 4 * TICK, 0.1], [21 + 7 * TICK, 0]])}</rect>`
+
+// The radio tower on the ridge west of the asylum: a tall tapering lattice mast
+// with cross bracing, two platforms, antennas at the top and guy wires to the
+// ground. Red warning lights blink at its top and its middle.
+function radioTower() {
+  const X = 300
+  const BOT = 470
+  const TOP = 92
+  const half = (y) => 3 + ((y - TOP) / (BOT - TOP)) * 21
+  let d = `M${X - half(BOT)} ${BOT}L${X - half(TOP)} ${TOP}M${X + half(BOT)} ${BOT}L${X + half(TOP)} ${TOP}`
+  for (let y = BOT; y > TOP + 10; ) {
+    const y2 = y - (10 + (y - TOP) * 0.08)
+    d += `M${n1(X - half(y))} ${n1(y)}L${n1(X + half(y2))} ${n1(y2)}M${n1(X + half(y))} ${n1(y)}L${n1(X - half(y2))} ${n1(y2)}M${n1(X - half(y2))} ${n1(y2)}H${n1(X + half(y2))}`
+    y = y2
+  }
+  const deck = (y) => `M${n1(X - half(y) - 6)} ${y}H${n1(X + half(y) + 6)}v3H${n1(X - half(y) - 6)}z`
+  const guys = `M${X - 2} 140L120 476M${X + 2} 140L480 470M${X - 8} 300L170 476M${X + 8} 300L430 472`
+  const blink = (x, y, begin) => `<g>${timeline('opacity', 2, begin ? [[0, 0.15], [1, 1]] : [[0, 1], [1, 0.15]])}<circle cx="${x}" cy="${y}" r="2.6" fill="#ff3a2a"/>${blob('o-red', x, y, 14, 14, 0.9)}</g>`
+  return `<path d="${d}" fill="none" stroke="#0b0e13" stroke-width="1.6"/>` +
+    `<path d="${deck(330)}${deck(190)}M${X - 1} ${TOP}V44h2V${TOP}zM${X - 9} ${TOP + 6}V66h1.6V${TOP + 6}zM${X + 7} ${TOP + 4}V72h1.6V${TOP + 4}z" fill="#0b0e13"/>` +
+    `<path d="M${X - 12} 112h8v14h-8zM${X + 5} 150h8v12h-8z" fill="#0b0e13"/>` +
+    `<path d="${guys}" stroke="#141921" stroke-width="0.8"/>` +
+    blink(X, 42, false) + blink(X - 15, 330, true) + blink(X + 15, 330, true)
+}
 
 // ---------------------------------------------------------------- the asylum
 
@@ -402,7 +465,6 @@ function asylum() {
   const lampFx = `<g>${timeline('opacity', 7, [[0, 1], [2, 0.3], [2 + 2 * TICK, 1], [2 + 5 * TICK, 0.2], [2 + 7 * TICK, 1], [5.5, 0.6], [5.5 + 3 * TICK, 1]])}${lamp}</g>`
   // Inmates running inside: dark silhouettes crossing each corridor's lit windows,
   // seen only through the glass, one way and then, later, the other.
-  const shape = '<path d="M-1 -11L1 -5M1 -5L-3 0M1 -5L4 -1M-1 -10L-5 -8M0 -10L4 -12" fill="none" stroke="#140f08" stroke-width="2.6" stroke-linecap="round"/><circle cx="-0.5" cy="-13.5" r="2.6" fill="#140f08"/>'
   let inside = ''
   CORRIDORS.forEach(([key, x0, step, y, a, b], ci) => {
     const xa = x0 + a * step - 10
@@ -414,8 +476,7 @@ function asylum() {
       const n = Math.round(((xb - xa) / 80) * FPS)
       const xs = [[0, dir > 0 ? xa - 8 : xb + 8]]
       for (let i = 0; i <= n; i++) xs.push([t0 + i / FPS, n0(dir > 0 ? xa + ((xb - xa) * i) / n : xb - ((xb - xa) * i) / n)])
-      const bob = wild ? ' transform="rotate(-12)"' : ''
-      return `<g>${timeline('', dur, xs.map(([t, v]) => [t, `${v}`]), 'translate')}<g transform="scale(${dir} 1)"><g${bob}>${shape}</g></g></g>`
+      return `<g>${timeline('', dur, xs.map(([t, v]) => [t, `${v}`]), 'translate')}<g transform="scale(${dir * 0.42} 0.42)" fill="#120d08" color="#120d08">${stride(wild)}</g></g>`
     }
     inside += `<clipPath id="o-cor${ci}"><path d="${clip}"/></clipPath><g clip-path="url(#o-cor${ci})"><g transform="translate(0 ${y + 11})">` +
       cross(2 + ci * 3, 1, ci === 1) + cross(dur / 2 + 1 + ci, -1, ci !== 1) + '</g></g>'
@@ -487,6 +548,9 @@ function grounds() {
     `<g>${stepDrift(70, 0, 60)}${blob('o-fog', 700, 560, 460, 30, 0.5)}${blob('o-fog', 1250, 555, 380, 26, 0.45)}</g>`
 }
 
+// The stride: the four poses shown in turn, three ticks each.
+const stride = (wild) => [0, 1, 2, 3].map((k) => `<g opacity="${k ? 0 : 1}">${timeline('opacity', 0.5, k ? [[0, 0], [k * 0.125, 1], [(k + 1) * 0.125, 0]].slice(0, k === 3 ? 2 : 3) : [[0, 1], [0.125, 0]])}<use href="#${wild ? 'j' : 'i'}${k}"/></g>`).join('')
+
 // Inmates running across the lawn behind the fence. None appears from nothing: each
 // runs in from beyond the frame's edge (behind the pines) or bursts out of the dark
 // front door, and runs off the edge or into the doorway. `path` is a list of
@@ -516,9 +580,7 @@ function runner(dur, t0, path, wild, s, fadeIn = false, fadeOut = false) {
   const fade = (from, to, start) => Array.from({ length: 6 }, (_, k) => [start + k / FPS, n2(from + ((to - from) * (k + 1)) / 6)])
   const vis = [[0, 0], ...(fadeIn ? fade(0, 1, t0) : [[t0, 1]]), ...(fadeOut ? fade(1, 0, t1 - 6 / FPS) : [[t1 + 1 / FPS, 0]])]
   const flip = path[path.length - 1][0] < path[0][0] ? -s : s
-  // The stride: each pose shown in turn, three ticks each.
-  const pose = (k) => `<g opacity="${k ? 0 : 1}">${timeline('opacity', 0.5, k ? [[0, 0], [k * 0.125, 1], [(k + 1) * 0.125, 0]].slice(0, k === 3 ? 2 : 3) : [[0, 1], [0.125, 0]])}<use href="#${wild ? 'j' : 'i'}${k}"/></g>`
-  return `<g opacity="0"${level ? ` transform="translate(0 ${path[0][1]})"` : ''}>${timeline('opacity', dur, vis)}<g>${timeline('', dur, pos, 'translate')}<g transform="scale(${flip} ${s})">${pose(0)}${pose(1)}${pose(2)}${pose(3)}</g></g></g>`
+  return `<g opacity="0"${level ? ` transform="translate(0 ${path[0][1]})"` : ''}>${timeline('opacity', dur, vis)}<g>${timeline('', dur, pos, 'translate')}<g transform="scale(${flip} ${s})" fill="#55595e" color="#7d8287">${stride(wild)}</g></g></g>`
 }
 function inmates() {
   const door = [1000, 527]
@@ -834,6 +896,7 @@ export function buildScene() {
     <linearGradient id="o-lit" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9c27c"/><stop offset="1" stop-color="#8a6f37"/></linearGradient>
     <radialGradient id="o-lamp"><stop offset="0" stop-color="#ffd98a" stop-opacity="0.55"/><stop offset="1" stop-color="#ffd98a" stop-opacity="0"/></radialGradient>
     <radialGradient id="o-lamp2"><stop offset="0" stop-color="#f4f6ff" stop-opacity="0.8"/><stop offset="1" stop-color="#f4f6ff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="o-red"><stop offset="0" stop-color="#ff3a2a" stop-opacity="0.6"/><stop offset="1" stop-color="#ff3a2a" stop-opacity="0"/></radialGradient>
     <radialGradient id="o-dome"><stop offset="0" stop-color="#ffcf8a" stop-opacity="0.5"/><stop offset="1" stop-color="#ffcf8a" stop-opacity="0"/></radialGradient>
     <radialGradient id="o-tail"><stop offset="0" stop-color="#ff3a2a" stop-opacity="0.45"/><stop offset="1" stop-color="#ff3a2a" stop-opacity="0"/></radialGradient>
     <linearGradient id="o-stain" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a0b0d" stop-opacity="0.7"/><stop offset="1" stop-color="#0a0b0d" stop-opacity="0"/></linearGradient>

@@ -100,7 +100,7 @@ Outlast inspired: a remote asylum on a mountain at night in a rainstorm, seen fr
 
 Moving parts:
 - rain falls, brighter in the beams of an abandoned jeep's headlights, and ripples cross the puddles;
-- lightning strikes, and a guard tower's searchlight sweeps the grounds;
+- lightning strikes, a guard tower's searchlight sweeps the grounds, and red lights blink on a radio mast on the ridge;
 - windows buzz and stutter, a power surge now and then blacks out the whole building, and a figure passes behind a lit window;
 - inmates in hospital gowns sprint across the lawn behind the fence, in from the frame's edge or out of the front door, and silhouettes run past the lit windows inside;
 - the camcorder shows REC, a running timecode and a draining battery, and about once a minute it switches to night vision, where something waits at the fence.
