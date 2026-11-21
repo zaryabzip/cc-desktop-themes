@@ -90,6 +90,25 @@ UI colours: cold slate panels, frost-white text and a lamplight gold accent.
 
 Not affiliated with Capcom, and no game assets are used: every shape is drawn in code, and the castle, the village and the mill are original designs.
 
+### Outlast
+
+![Outlast](docs/outlast.jpg)
+
+![Outlast in night vision](docs/outlast-night-vision.jpg)
+
+Outlast inspired: a remote asylum on a mountain at night in a rainstorm, seen from the mud road at its gate through a camcorder viewfinder.
+
+Moving parts:
+- rain falls, brighter in the beams of an abandoned jeep's headlights, and ripples cross the puddles;
+- lightning strikes, and a guard tower's searchlight sweeps the grounds;
+- windows buzz and stutter, a power surge now and then blacks out the whole building, and a figure passes behind a lit window;
+- inmates in hospital gowns sprint across the lawn behind the fence;
+- the camcorder shows REC, a running timecode and a draining battery, and about once a minute it switches to night vision, where something waits at the fence.
+
+UI colours: near-black panels, cold grey text and a night-vision green accent.
+
+Not affiliated with Red Barrels, and no game assets are used: every shape is drawn in code, and the asylum, the jeep and the figures are original designs.
+
 ## Install
 
 Install one theme at a time. Every theme sets the backdrop when a session starts, so with two enabled, whichever runs last wins.
@@ -116,6 +135,10 @@ At the prompt of a Claude Code terminal session:
 /plugin install village --marketplace zaryabzip/cc-desktop-themes
 ```
 
+```
+/plugin install outlast --marketplace zaryabzip/cc-desktop-themes
+```
+
 Answer `y` to add the marketplace, then pick a scope (the user scope is first).
 
 From a shell:
@@ -138,6 +161,10 @@ claude plugin install cyberpunk-2077 --marketplace zaryabzip/cc-desktop-themes
 
 ```bash
 claude plugin install village --marketplace zaryabzip/cc-desktop-themes
+```
+
+```bash
+claude plugin install outlast --marketplace zaryabzip/cc-desktop-themes
 ```
 
 In the desktop app, where `/plugin` does not run: click **+** next to the prompt box, then **Plugins**, **Add marketplace** with `zaryabzip/cc-desktop-themes`, then **Add plugin**.
