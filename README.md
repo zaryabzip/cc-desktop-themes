@@ -109,6 +109,55 @@ UI colours: near-black panels, cold grey text and a night-vision green accent.
 
 Not affiliated with Red Barrels, and no game assets are used: every shape is drawn in code, and the asylum, the jeep and the figures are original designs.
 
+### Alan Wake
+
+![Alan Wake](docs/alan-wake.jpg)
+
+Alan Wake inspired: a lake at night, with a lighthouse on a rocky point, a cabin with one lit window, and a man at the end of a dock searching the far shore with a flashlight.
+
+Moving parts:
+- the lighthouse beam sweeps round and flashes across the water when it turns toward you;
+- the man's flashlight searches the far shore, finds a figure of darkness forming in the fog, and burns it away;
+- the darkness creeps out over the water and draws back, and crows wheel over the treeline;
+- manuscript pages drift down through the night, an empty rowboat rocks by the reeds, and a lamp on the dock buzzes.
+
+UI colours: deep navy panels, cold white text and a lamplight yellow accent.
+
+Not affiliated with Remedy Entertainment, and no game assets are used: every shape is drawn in code, and the man, the figures and the places are original designs.
+
+### Red Dead Redemption 2
+
+![Red Dead Redemption 2](docs/red-dead-redemption-2.jpg)
+
+Red Dead Redemption 2 inspired: a camp by a mountain river at blue hour, under snowy peaks and the Milky Way, with a cowboy on a log by the fire.
+
+Moving parts:
+- the fire flickers and throws sparks, the coffee pot steams, and the tent and lantern glow;
+- the cowboy drinks from his tin cup now and then, and the camp dog thumps its tail and looks up;
+- a steam train crosses a trestle bridge at the mouth of the valley;
+- the horse grazes, a deer drinks at the river, a hawk circles, and fireflies blink;
+- the river runs over rocks, mist drifts on the water, and a shooting star crosses now and then.
+
+UI colours: warm dark-brown panels, parchment text and an ember orange accent.
+
+Not affiliated with Rockstar Games, and no game assets are used: every shape is drawn in code, and the cowboy, the animals and the camp are original designs.
+
+### Firewatch
+
+![Firewatch](docs/firewatch.jpg)
+
+Firewatch inspired: sunset over ridge after ridge of pine forest, with a fire lookout tower, a lake in the valley, and a hiker on a granite outcrop with a radio.
+
+Moving parts:
+- the hiker's radio blinks, and a second lookout on a far ridge blinks back;
+- smoke rises from a distant wildfire and leans in the wind;
+- sun rays slowly brighten and dim, the lake glitters, and the clouds drift;
+- an eagle circles, a flock of birds crosses, and fireweed sways.
+
+UI colours: deep plum panels, warm cream text and a sunset orange accent.
+
+Not affiliated with Campo Santo, and no game assets are used: every shape is drawn in code, and the hiker, the towers and the land are original designs.
+
 ## Install
 
 Install one theme at a time. Every theme sets the backdrop when a session starts, so with two enabled, whichever runs last wins.
@@ -139,6 +188,18 @@ At the prompt of a Claude Code terminal session:
 /plugin install outlast --marketplace zaryabzip/cc-desktop-themes
 ```
 
+```
+/plugin install alan-wake --marketplace zaryabzip/cc-desktop-themes
+```
+
+```
+/plugin install red-dead-redemption-2 --marketplace zaryabzip/cc-desktop-themes
+```
+
+```
+/plugin install firewatch --marketplace zaryabzip/cc-desktop-themes
+```
+
 Answer `y` to add the marketplace, then pick a scope (the user scope is first).
 
 From a shell:
@@ -165,6 +226,18 @@ claude plugin install village --marketplace zaryabzip/cc-desktop-themes
 
 ```bash
 claude plugin install outlast --marketplace zaryabzip/cc-desktop-themes
+```
+
+```bash
+claude plugin install alan-wake --marketplace zaryabzip/cc-desktop-themes
+```
+
+```bash
+claude plugin install red-dead-redemption-2 --marketplace zaryabzip/cc-desktop-themes
+```
+
+```bash
+claude plugin install firewatch --marketplace zaryabzip/cc-desktop-themes
 ```
 
 In the desktop app, where `/plugin` does not run: click **+** next to the prompt box, then **Plugins**, **Add marketplace** with `zaryabzip/cc-desktop-themes`, then **Add plugin**.

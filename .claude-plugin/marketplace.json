@@ -33,6 +33,21 @@
       "name": "outlast",
       "source": "./plugins/outlast",
       "description": "Outlast inspired: a remote asylum on a mountain at night in a rainstorm, seen through a camcorder that switches to night vision."
+    },
+    {
+      "name": "alan-wake",
+      "source": "./plugins/alan-wake",
+      "description": "Alan Wake inspired: a lake at night, a lighthouse beam sweeping the water, and a man on a dock searching the far shore with a flashlight."
+    },
+    {
+      "name": "red-dead-redemption-2",
+      "source": "./plugins/red-dead-redemption-2",
+      "description": "Red Dead Redemption 2 inspired: a camp by a mountain river at blue hour, with a cowboy by the fire, a grazing horse and snowy peaks."
+    },
+    {
+      "name": "firewatch",
+      "source": "./plugins/firewatch",
+      "description": "Firewatch inspired: ridge after ridge of pine forest at sunset, a fire lookout tower and the smoke of a distant wildfire."
     }
   ]
 }
