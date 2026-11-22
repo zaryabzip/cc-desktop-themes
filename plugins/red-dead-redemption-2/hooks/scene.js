@@ -364,35 +364,290 @@ function land() {
 
 // ---------------------------------------------------------------- the horse
 
-// A bay horse grazing on the left bank, side on, facing right: a brown coat shaded
-// darker underneath, black mane, tail and lower legs, a white blaze. Its neck lowers
-// to the grass and rises again; its tail swishes.
-function horse() {
-  const body = 'M-60 -114C-78 -114 -94 -104 -94 -88C-94 -76 -88 -66 -84 -58C-84 -48 -86 -40 -84 -32L-80 -10L-82 0H-70L-71 -10L-72 -30C-70 -44 -66 -56 -58 -64C-40 -70 -10 -66 16 -66C26 -66 34 -68 38 -64L40 -36L42 -28L42 -8L40 0H52L52 -8L52 -30L54 -40C56 -56 60 -70 64 -80C70 -96 66 -108 56 -116C40 -122 20 -110 0 -108C-20 -106 -40 -114 -60 -114Z'
-  const socks = 'M-84 -32L-80 -10L-82 0H-70L-71 -10L-72 -30ZM40 -36L42 -28L42 -8L40 0H52L52 -8L52 -30L53 -36Z'
-  const farLegs = 'M-66 -60C-62 -48 -64 -40 -62 -32L-58 -10L-60 0H-48L-50 -10L-52 -32C-50 -44 -50 -54 -48 -62ZM22 -66L24 -36L26 -28L26 -8L24 0H36L36 -8L36 -30L38 -64Z'
-  const neck = 'M34 -116C50 -140 76 -158 98 -164L103 -171L106 -163L112 -158C122 -148 136 -132 144 -120C148 -112 144 -104 136 -104C126 -106 114 -110 106 -118C96 -126 90 -122 84 -112C76 -100 68 -90 62 -78Z'
-  const mane = 'M34 -118C50 -142 74 -160 98 -166L100 -160C78 -152 56 -136 44 -112Z'
-  const blaze = 'M118 -150L136 -124L134 -118L114 -144Z'
-  const tail = 'M-90 -104Q-112 -90 -110 -56Q-108 -34 -100 -18Q-100 -44 -96 -60Q-94 -78 -88 -90Z'
-  const muscle = 'M-80 -94C-70 -84 -66 -70 -66 -60M40 -96C46 -86 50 -76 50 -64M-20 -100C-10 -98 10 -98 30 -104'
-  const piv = '56 -104'
-  const graze = timeline('', 23, [[0, `0 ${piv}`], [4, `14 ${piv}`], [4.5, `30 ${piv}`], [5, `48 ${piv}`], [5.5, `62 ${piv}`], [6, `74 ${piv}`], [14, `66 ${piv}`], [14.5, `48 ${piv}`], [15, `28 ${piv}`], [15.5, `10 ${piv}`], [16, `0 ${piv}`]], 'rotate')
-  const swish = timeline('', 7, [[0, '0 -90 -100'], [2, '10 -90 -100'], [2.25, '18 -90 -100'], [2.5, '8 -90 -100'], [2.75, '-6 -90 -100'], [3, '0 -90 -100']], 'rotate')
-  return `<g transform="translate(330 672) scale(0.92)">` +
-    `<ellipse cx="-10" cy="2" rx="110" ry="9" fill="#05070c" opacity="0.7"/>` +
-    `<path d="${farLegs}" fill="#140c08"/>` +
-    `<g>${swish}<path d="${tail}" fill="#0e0806"/></g>` +
-    `<path d="${body}" fill="url(#r-bay)"/><path d="${socks}" fill="#120a06"/>` +
-    `<path d="${muscle}" fill="none" stroke="#2a180e" stroke-width="2.4" opacity="0.6" stroke-linecap="round"/>` +
-    `<path d="M-92 -96C-86 -110 -72 -114 -60 -114C-40 -114 -20 -106 0 -108C20 -110 40 -122 56 -116" fill="none" stroke="#8a9ac0" stroke-width="2" opacity="0.5"/>` +
-    // The saddle: tree, horn, skirt, a blanket under it, the cinch.
-    `<path d="M-30 -112Q0 -104 30 -114L32 -86Q2 -80 -30 -86Z" fill="#7a2e22"/><path d="M-20 -116Q4 -108 24 -118L22 -96Q2 -90 -18 -96Z" fill="#4a2a18"/>` +
-    `<path d="M18 -118l6 -12l5 2l-4 10z" fill="#3a2010"/><path d="M2 -92v40" stroke="#2a160e" stroke-width="3"/>` +
-    `<g>${graze}<path d="${neck}" fill="url(#r-bayN)"/><path d="${mane}" fill="#0e0806"/><path d="${blaze}" fill="#e8dccc"/><circle cx="118" cy="-146" r="2.2" fill="#0a0604"/>` +
-    `<path d="M106 -118Q126 -112 140 -108M112 -140L122 -150" stroke="#1a100a" stroke-width="2" fill="none"/></g>` +
-    `</g>`
+// A bay horse grazing on the left bank, built in 3D: the body, neck, head, legs and
+// tail are tubes along a skeleton in metres, seen through a camera from in front
+// and to the left of it, so it has real depth and foreshortening. Each tube is
+// drawn as its projected outline, then a lighter core shifted up for the rounded
+// top and a cold rim of sky light. The neck is a chain from the withers to the poll
+// that bends down to the grass and back up, in six poses swapped on the clock; the
+// tail swishes. x runs forward, y to the horse's right (the near side is y < 0),
+// z up.
+const HC = { yaw: -22, D: 11, F: 1150, eye: 1.5, cx: 326, gy: 676 }
+function hp(x, y, z) {
+  const c = Math.cos((HC.yaw * Math.PI) / 180)
+  const s = Math.sin((HC.yaw * Math.PI) / 180)
+  const xr = x * c - y * s
+  const d = HC.D + x * s + y * c
+  return [HC.cx + (HC.F * xr) / d, HC.gy + (HC.F * (HC.eye - z)) / d - (HC.F * HC.eye) / HC.D, d]
 }
+// A tube along 3D points [x, y, z, r]: its projected outline with round ends, as a
+// path; `lift` shifts it up by part of its radius and `k` scales the radius, for
+// the lit core.
+function htube(pts0, k = 1, lift = 0) {
+  // Resample the skeleton along a Catmull-Rom curve, so joints bend smoothly.
+  const pts3 = []
+  for (let i = 0; i < pts0.length - 1; i++) {
+    const p0 = pts0[Math.max(0, i - 1)]
+    const p1 = pts0[i]
+    const p2 = pts0[i + 1]
+    const p3 = pts0[Math.min(pts0.length - 1, i + 2)]
+    const steps = pts0.length > 6 ? 1 : pts0.length > 3 ? 2 : 3
+    for (let j = 0; j < steps; j++) {
+      const t = j / steps
+      pts3.push(p1.map((_, c) => 0.5 * (2 * p1[c] + (-p0[c] + p2[c]) * t + (2 * p0[c] - 5 * p1[c] + 4 * p2[c] - p3[c]) * t * t + (-p0[c] + 3 * p1[c] - 3 * p2[c] + p3[c]) * t * t * t)))
+    }
+  }
+  pts3.push(pts0[pts0.length - 1])
+  const P = pts3.map(([x, y, z, r]) => {
+    const [X, Y, d] = hp(x, y, z)
+    const sr = (r * HC.F) / d
+    return [X, Y - lift * sr, sr * k]
+  })
+  const n = P.length
+  const L = []
+  const R = []
+  const T = []
+  for (let i = 0; i < n; i++) {
+    const a = P[Math.max(0, i - 1)]
+    const b = P[Math.min(n - 1, i + 1)]
+    let tx = b[0] - a[0]
+    let ty = b[1] - a[1]
+    const l = Math.hypot(tx, ty) || 1
+    tx /= l
+    ty /= l
+    T.push([tx, ty])
+    L.push([P[i][0] - ty * P[i][2], P[i][1] + tx * P[i][2]])
+    R.push([P[i][0] + ty * P[i][2], P[i][1] - tx * P[i][2]])
+  }
+  const cap = (i, dir) => {
+    const [x, y, sr] = P[i]
+    const [tx, ty] = T[i]
+    const out = []
+    for (const a of [0.5, 0, -0.5]) {
+      const ang = Math.atan2(ty * dir, tx * dir) + a * 1.4
+      out.push([x + Math.cos(ang) * sr, y + Math.sin(ang) * sr])
+    }
+    return out
+  }
+  const ring = [...L, ...cap(n - 1, 1).reverse(), ...R.reverse(), ...cap(0, -1)]
+  // A smooth closed outline: curves through the midpoints, the points as controls.
+  const m = (i) => ring[(i + ring.length) % ring.length]
+  const mid = (i) => [(m(i)[0] + m(i + 1)[0]) / 2, (m(i)[1] + m(i + 1)[1]) / 2]
+  let d = `M${n0(mid(0)[0])} ${n0(mid(0)[1])}`
+  for (let i = 1; i <= ring.length; i++) d += `Q${n0(m(i)[0])} ${n0(m(i)[1])} ${n0(mid(i)[0])} ${n0(mid(i)[1])}`
+  return { d: d + 'Z', L, R: R.reverse(), P }
+}
+// A quadratic curve through 3D points, sampled.
+const qb = (a, c, b, n, r0, r1) => Array.from({ length: n }, (_, i) => {
+  const t = i / (n - 1)
+  const u = 1 - t
+  return [0, 1, 2].map((k) => u * u * a[k] + 2 * u * t * c[k] + t * t * b[k]).concat(r0 + (r1 - r0) * t)
+})
+function horse() {
+  const COAT = '#3c2316'
+  const LIT = '#64402a'
+  const DARK = '#140b07'
+  const FAR = '#24140c'
+  const RIM = '#8a9ac0'
+  const shade = (pts, base, lit = LIT) => {
+    const t = htube(pts)
+    return `<path d="${t.d}" fill="${base}"/><path d="${htube(pts, 0.62, 0.32).d}" fill="${lit}" opacity="0.75"/>`
+  }
+  // The legs, as side-view profiles in metres: the front edge from top to hoof,
+  // then the back edge from top to heel. A fore leg: a muscled forearm, the bony
+  // knee, a thin cannon, the fetlock, a sloped pastern, a flared hoof. A hind leg:
+  // the gaskin's swell, the sharp point of the hock behind, then the same below.
+  const smoothPath = (ring) => {
+    const m = (i) => ring[(i + ring.length) % ring.length]
+    const mid = (i) => [(m(i)[0] + m(i + 1)[0]) / 2, (m(i)[1] + m(i + 1)[1]) / 2]
+    let d = `M${n0(mid(0)[0])} ${n0(mid(0)[1])}`
+    for (let i = 1; i <= ring.length; i++) d += `Q${n0(m(i)[0])} ${n0(m(i)[1])} ${n0(mid(i)[0])} ${n0(mid(i)[1])}`
+    return d + 'Z'
+  }
+  // The part of an edge below height z0, with the point where it crosses z0.
+  const below = (edge, z0) => {
+    const out = []
+    for (let i = 0; i < edge.length; i++) {
+      const [x, z] = edge[i]
+      if (z <= z0) {
+        if (i > 0 && edge[i - 1][1] > z0) {
+          const [px, pz] = edge[i - 1]
+          out.push([px + ((x - px) * (pz - z0)) / (pz - z), z0])
+        }
+        out.push([x, z])
+      }
+    }
+    return out
+  }
+  // The body: rump, loin, barrel, girth and chest along a gently dipping back.
+  const body = [[-0.86, 0, 1.36, 0.26], [-0.66, 0, 1.34, 0.33], [-0.34, 0, 1.28, 0.33], [0.0, 0, 1.22, 0.36], [0.34, 0, 1.24, 0.35], [0.62, 0, 1.3, 0.29]]
+  // The tail, from its root over the rump, falling to the hocks.
+  const [rx, ry] = hp(-0.86, -0.1, 1.54)
+  const swish = timeline('', 7, [[0, `0 ${n0(rx)} ${n0(ry)}`], [2, `10 ${n0(rx)} ${n0(ry)}`], [2.25, `16 ${n0(rx)} ${n0(ry)}`], [2.5, `6 ${n0(rx)} ${n0(ry)}`], [2.75, `-6 ${n0(rx)} ${n0(ry)}`], [3, `0 ${n0(rx)} ${n0(ry)}`]], 'rotate')
+  // The saddle, built on the barrel's surface: a point at length x along the body
+  // and angle th (degrees) round from the top of the back down the near side.
+  const surf = (x, th, out = 0) => {
+    let k = 1
+    while (k < body.length - 1 && body[k][0] < x) k++
+    const [x0, , z0, r0] = body[k - 1]
+    const [x1, , z1, r1] = body[k]
+    const u = Math.min(1, Math.max(0, (x - x0) / (x1 - x0)))
+    const zc = z0 + (z1 - z0) * u
+    const r = r0 + (r1 - r0) * u + out
+    const t = (th * Math.PI) / 180
+    return hp(x, -r * Math.sin(t), zc + r * Math.cos(t))
+  }
+  const poly = (ps) => smoothPath(ps)
+  const sheet = (x0, x1, th0, th1, out, round = 0) => {
+    const ps = []
+    for (let i = 0; i <= 4; i++) ps.push(surf(x0 + ((x1 - x0) * i) / 4, th0, out))
+    for (let j = 1; j <= 3; j++) ps.push(surf(x1 - round * (j === 3 ? 1 : 0), th0 + ((th1 - th0) * j) / 3, out))
+    for (let i = 4; i >= 0; i--) ps.push(surf(x0 + ((x1 - x0) * i) / 4 + (i === 0 || i === 4 ? (i ? -round : round) : 0), th1, out))
+    for (let j = 2; j >= 1; j--) ps.push(surf(x0 + round * (j === 2 ? 1 : 0), th0 + ((th1 - th0) * j) / 3, out))
+    return ps
+  }
+  const strip = (x0, x1, th, out) => 'M' + [0, 1, 2, 3, 4].map((i) => surf(x0 + ((x1 - x0) * i) / 4, th, out)).map(([X, Y]) => `${n0(X)} ${n0(Y)}`).join('L')
+  // The blanket: a wool pad, two cream stripes near its edge.
+  const blanket = poly(sheet(-0.32, 0.42, -12, 74, 0.012, 0.02))
+  const stripes = strip(-0.31, 0.41, 62, 0.014) + strip(-0.31, 0.41, 67, 0.014)
+  // The skirt: a leather panel with rounded corners, tooled along its border.
+  const skirt = poly(sheet(-0.26, 0.32, -8, 58, 0.03, 0.04))
+  const tool = strip(-0.22, 0.28, 52, 0.032)
+  // The seat: the cantle raised at the back, a dip, the swell and horn at the front.
+  const seatTop = [[-0.24, 0.13], [-0.2, 0.1], [-0.1, 0.045], [0.04, 0.04], [0.16, 0.08], [0.24, 0.12]]
+  const seat = [...seatTop.map(([x, dz]) => surf(x, 0, 0.03 + dz)), ...seatTop.slice().reverse().map(([x]) => surf(x, 34, 0.035))]
+  const cantle = poly([surf(-0.27, -10, 0.05), surf(-0.25, -6, 0.17), surf(-0.19, 6, 0.13), surf(-0.18, 30, 0.05), surf(-0.26, 30, 0.04)])
+  const [hbx, hby] = surf(0.25, 4, 0.12)
+  const [htx, hty] = surf(0.27, 4, 0.22)
+  // The fender and stirrup hanging from the seat; the cinch under the belly.
+  const fender = poly([surf(-0.02, 30, 0.04), surf(0.08, 30, 0.04), surf(0.1, 70, 0.045), surf(0.11, 95, 0.05), surf(-0.03, 95, 0.05), surf(-0.04, 70, 0.045)])
+  const [fx, fy] = surf(0.04, 104, 0.06)
+  const stirrup = `M${n0(fx - 9)} ${n0(fy)}h18l-2 10h-14z`
+  const cinch = 'M' + [surf(0.28, 56, 0.035), surf(0.28, 110, 0.02), surf(0.28, 150, 0.01)].map(([X, Y]) => `${n0(X)} ${n0(Y)}`).join('L')
+  const ring = surf(0.28, 60, 0.04)
+  // The bedroll tied across behind the cantle, its straps, and a saddlebag below.
+  const roll = htube([[-0.36, -0.3, 1.64, 0.07], [-0.36, 0.28, 1.64, 0.07]])
+  const bag = poly([surf(-0.42, 28, 0.04), surf(-0.3, 28, 0.04), surf(-0.29, 88, 0.05), surf(-0.33, 96, 0.05), surf(-0.41, 94, 0.05), surf(-0.44, 80, 0.045)])
+  const bagFlap = poly([surf(-0.42, 28, 0.045), surf(-0.3, 28, 0.045), surf(-0.3, 52, 0.05), surf(-0.36, 58, 0.05), surf(-0.42, 52, 0.05)])
+  const strapAt = (x) => { const [a1, b1] = hp(x, -0.37, 1.64); return `M${n0(a1)} ${n0(b1 - 10)}v20` }
+  const SADDLE = `<path d="${blanket}" fill="#5a2a3a"/><path d="${stripes}" fill="none" stroke="#d8c8a0" stroke-width="2.6"/>` +
+    `<path d="${bag}" fill="#4a2c18"/><path d="${bagFlap}" fill="#5a3620"/>` +
+    `<path d="${skirt}" fill="#6a3e22"/><path d="${tool}" fill="none" stroke="#3a2010" stroke-width="1.4" stroke-dasharray="3 3"/>` +
+    `<path d="${fender}" fill="#5a3418"/>` +
+    `<path d="${roll.d}" fill="#6a6248"/><path d="${htube([[-0.36, -0.3, 1.64, 0.07], [-0.36, 0.28, 1.64, 0.07]], 0.5, 0.35).d}" fill="#8a8262"/><path d="${strapAt(-0.4)}${strapAt(-0.32)}" stroke="#2a180c" stroke-width="3"/>` +
+    `<path d="${smoothPath(seat)}" fill="#7a4a28"/><path d="${cantle}" fill="#5a3418"/>` +
+    `<path d="M${seatTop.map(([x, dz]) => surf(x, 0, 0.03 + dz)).map(([X, Y]) => `${n0(X)} ${n0(Y)}`).join('L')}" fill="none" stroke="#c89060" stroke-width="2" opacity="0.8"/>` +
+    `<path d="M${n0(hbx)} ${n0(hby)}L${n0(htx)} ${n0(hty)}" stroke="#4a2a14" stroke-width="5" stroke-linecap="round"/><ellipse cx="${n0(htx)}" cy="${n0(hty)}" rx="6" ry="2.6" fill="#6a3e22"/>` +
+    `<path d="${cinch}" fill="none" stroke="#3a2414" stroke-width="5"/><circle cx="${n0(ring[0])}" cy="${n0(ring[1])}" r="3.4" fill="none" stroke="#8a8a90" stroke-width="1.6"/>` +
+    `<path d="${stirrup}" fill="#3a2414"/>`
+  // The neck and head in a pose: g = 0 head up, 1 grazing.
+  // The neck grows out of the whole front of the shoulder, from the withers to the
+  // point of the shoulder, so the chest never shows in front of it.
+  const B = [0.6, 0, 1.42]
+  const pose = (g) => {
+    const a = ((48 - 100 * g) * Math.PI) / 180
+    const L = 0.98
+    const poll = [B[0] + Math.cos(a) * L, 0, B[2] + Math.sin(a) * L]
+    // The crest arches up, more when the head is up.
+    const mid = [(B[0] + poll[0]) / 2, 0, (B[2] + poll[2]) / 2]
+    const ctl = [mid[0] - Math.sin(a) * (0.16 - 0.06 * g), 0, mid[2] + Math.cos(a) * (0.16 - 0.06 * g)]
+    const neck = qb(B, ctl, poll, 8, 0.3, 0.13)
+    const h = ((-40 - 48 * g) * Math.PI) / 180
+    const hl = 0.62
+    const dir = [Math.cos(h), Math.sin(h)]
+    const dors = [-Math.sin(h), Math.cos(h)]
+    const at = (t, off, y = 0, r = 0) => [poll[0] + dir[0] * hl * t + dors[0] * off, y, poll[2] + dir[1] * hl * t + dors[1] * off, r]
+    const head = [at(0, 0, 0, 0.115), at(0.3, -0.01, 0, 0.11), at(0.62, 0, 0, 0.08), at(0.86, -0.005, 0, 0.074), at(1, -0.01, 0, 0.082)]
+    const cheek = [at(0.08, -0.07, 0, 0.12), at(0.26, -0.06, 0, 0.13), at(0.36, -0.03, 0, 0.09)]
+    const nt = htube(neck)
+    // The mane: a ragged band along the crest, on its upper edge.
+    const crest = nt.R
+    let mane = 'M' + crest.map(([x, y]) => `${n0(x)} ${n0(y)}`).join('L')
+    for (let i = crest.length - 1; i >= 0; i--) {
+      const [x, y] = crest[i]
+      const [px, py, sr] = nt.P[i]
+      const ox = (x - px) / (sr || 1)
+      const oy = (y - py) / (sr || 1)
+      const len = (i % 2 ? 5 : 9) + (1 - i / crest.length) * 2
+      mane += `L${n0(x + ox * len * 0.4 - oy * 2)} ${n0(y + oy * len * 0.4 + ox * 2)}L${n0(x - ox * len * 0.6)} ${n0(y - oy * len * 0.6)}`
+    }
+    mane += 'Z'
+    // Ears at the poll, eye, nostril, a white blaze down the face.
+    const [px, py] = hp(...poll)
+    const up = a + Math.PI / 2
+    const ear = (dx) => `M${n0(px + dx)} ${n0(py)}l${n0(Math.cos(up + 0.5) * 14)} ${n0(-Math.sin(up + 0.5) * 14)}l${n0(Math.cos(up - 0.2) * 6)} ${n0(Math.sin(up - 0.2) * -6 + 8)}z`
+    const [ex, ey] = hp(...at(0.2, 0.04, -0.09))
+    const [mx, my] = hp(...at(0.93, -0.03, -0.06))
+    const blaze = htube([at(0.1, 0.1, -0.03, 0.018), at(0.5, 0.07, -0.03, 0.022), at(0.92, 0.07, -0.03, 0.03)])
+    return `<path d="${nt.d}" fill="${COAT}"/><path d="${htube(neck, 0.6, 0.3).d}" fill="${LIT}" opacity="0.75"/>` +
+      `<path d="${htube(cheek).d}" fill="${COAT}"/><path d="${htube(head).d}" fill="${COAT}"/><path d="${htube(head, 0.55, 0.3).d}" fill="${LIT}" opacity="0.7"/>` +
+      `<path d="${blaze.d}" fill="#e6dccc" opacity="0.9"/><ellipse cx="${n0(mx)}" cy="${n0(my)}" rx="2.6" ry="1.8" fill="#120a06"/>` +
+      `<path d="${mane}" fill="#0e0806"/><path d="${ear(-4)}${ear(4)}" fill="#24140c"/><circle cx="${n1(ex)}" cy="${n1(ey)}" r="2.4" fill="#0a0604"/>` +
+      `<path d="M${crest.slice(2).map(([x, y]) => `${n0(x)} ${n0(y)}`).join('L')}" fill="none" stroke="${RIM}" stroke-width="1.6" opacity="0.45"/>`
+  }
+  const G = [0, 0.25, 0.5, 0.75, 1]
+  // Lowering over one second (a pose every 6 ticks), grazing, raising, standing.
+  const step = 1 / 4
+  const vis = (k) => k === 0 ? [[0, 1], [4, 0], [15, 1]] : k === 4 ? [[0, 0], [4 + 3 * step, 1], [14, 0]]
+    : [[0, 0], [4 + (k - 1) * step, 1], [4 + k * step, 0], [14 + (3 - k) * step, 1], [14 + (4 - k) * step, 0]]
+  const poses = G.map((g, k) => `<g opacity="${k ? 0 : 1}">${timeline('opacity', 23, vis(k))}${pose(g)}</g>`).join('')
+  // The horse in one piece, as it stands side on: the outline of the body, with
+  // the near legs growing out of it. The hindquarter is one mass: the croup rounds
+  // over into the buttock, down the back of the thigh and the gaskin to the point
+  // of the hock; in front the stifle and the flank run up into the belly. The
+  // shoulder and chest carry down into the forearm and the knee. Below the knee and
+  // the hock the legs are lean: cannon, fetlock, sloped pastern, hoof. [x, z] in
+  // metres, the near side at y = -0.12.
+  const SIL = [
+    [0.44, 1.63], [0.2, 1.56], [-0.1, 1.55], [-0.38, 1.58], [-0.62, 1.62], [-0.8, 1.58], [-0.9, 1.5], [-0.96, 1.36],
+    [-0.95, 1.18], [-0.89, 0.98], [-0.82, 0.8], [-0.82, 0.66], [-0.83, 0.56],
+    [-0.79, 0.44], [-0.78, 0.26], [-0.8, 0.16], [-0.76, 0.05], [-0.74, 0.0], [-0.62, 0.0], [-0.66, 0.07], [-0.7, 0.17], [-0.71, 0.26], [-0.71, 0.5],
+    [-0.69, 0.62], [-0.65, 0.78], [-0.57, 0.94], [-0.47, 1.02], [-0.25, 0.96], [0.05, 0.93], [0.28, 0.95],
+    [0.35, 0.9], [0.37, 0.76], [0.39, 0.6], [0.4, 0.48], [0.41, 0.26], [0.39, 0.16], [0.44, 0.06], [0.45, 0.0], [0.58, 0.0], [0.55, 0.07], [0.51, 0.17], [0.49, 0.26], [0.49, 0.5],
+    [0.51, 0.6], [0.52, 0.78], [0.58, 0.97], [0.67, 1.1], [0.73, 1.28], [0.72, 1.42], [0.6, 1.56],
+  ]
+  const near = (pts) => pts.map(([x, z]) => hp(x, -0.12, z))
+  const sil = smoothPath(near(SIL))
+  // The lower legs, darker below the knee and hock, and the hooves.
+  const lowF = smoothPath(near([[0.4, 0.5], [0.41, 0.26], [0.39, 0.16], [0.44, 0.06], [0.45, 0.0], [0.58, 0.0], [0.55, 0.07], [0.51, 0.17], [0.49, 0.26], [0.49, 0.5]]))
+  const lowH = smoothPath(near([[-0.8, 0.5], [-0.78, 0.26], [-0.8, 0.16], [-0.76, 0.05], [-0.74, 0.0], [-0.62, 0.0], [-0.66, 0.07], [-0.7, 0.17], [-0.71, 0.26], [-0.71, 0.5]]))
+  const hooves = smoothPath(near([[0.44, 0.06], [0.45, 0.0], [0.58, 0.0], [0.55, 0.07]])) + smoothPath(near([[-0.76, 0.05], [-0.74, 0.0], [-0.62, 0.0], [-0.66, 0.07]]))
+  // The far legs, behind the body: the far fore a step back, the far hind a step
+  // forward, so the four legs read apart.
+  const far = (pts, dx) => smoothPath(pts.map(([x, z]) => hp(x + dx, 0.16, z)))
+  const farF = far([[0.36, 1.0], [0.37, 0.76], [0.39, 0.6], [0.4, 0.48], [0.41, 0.26], [0.39, 0.16], [0.44, 0.06], [0.45, 0.0], [0.58, 0.0], [0.55, 0.07], [0.51, 0.17], [0.49, 0.26], [0.49, 0.5], [0.51, 0.6], [0.52, 0.78], [0.54, 1.0]], -0.1)
+  const farH = far([[-0.88, 1.0], [-0.82, 0.8], [-0.82, 0.66], [-0.83, 0.56], [-0.79, 0.44], [-0.78, 0.26], [-0.8, 0.16], [-0.76, 0.05], [-0.74, 0.0], [-0.62, 0.0], [-0.66, 0.07], [-0.7, 0.17], [-0.71, 0.26], [-0.71, 0.5], [-0.69, 0.62], [-0.65, 0.78], [-0.6, 1.0]], 0.12)
+  // Light and shade: the round of the hindquarter and of the shoulder lit from the
+  // sky, the belly and the inside of the thigh in shadow.
+  const at = (x, z) => hp(x, -0.12, z)
+  const [qx, qy] = at(-0.62, 1.3)
+  const [sx2, sy2] = at(0.48, 1.3)
+  const [bx2, by2] = at(-0.1, 1.38)
+  const [ux, uy] = at(-0.1, 1.0)
+  const [gx, gy2] = at(-0.62, 0.92)
+  // Muscle lines: the edge of the hindquarter, the line of the shoulder.
+  const lines = 'M' + [at(-0.45, 1.5), at(-0.42, 1.28), at(-0.5, 1.06), at(-0.58, 0.96)].map(([X, Y]) => `${n0(X)} ${n0(Y)}`).join('L') +
+    'M' + [at(0.48, 1.58), at(0.4, 1.36), at(0.4, 1.12)].map(([X, Y]) => `${n0(X)} ${n0(Y)}`).join('L')
+  const back = 'M' + SIL.slice(0, 8).map(([x, z]) => at(x, z)).map(([X, Y]) => `${n0(X)} ${n0(Y)}`).join('L')
+  // The tail: falling from its root close down the back of the thigh, full in the
+  // middle, tapering to the hocks, a few loose hairs.
+  const TAIL = [[-0.84, 1.56], [-0.94, 1.5], [-1.0, 1.32], [-1.01, 1.08], [-0.99, 0.84], [-0.96, 0.62], [-0.92, 0.46], [-0.88, 0.56], [-0.9, 0.82], [-0.92, 1.1], [-0.92, 1.32], [-0.88, 1.46]]
+  const tailD = smoothPath(TAIL.map(([x, z]) => hp(x, -0.1, z)))
+  const hairs = 'M' + [hp(-0.96, -0.1, 1.3), hp(-0.98, -0.1, 0.9), hp(-0.95, -0.1, 0.55)].map(([X, Y]) => `${n0(X)} ${n0(Y)}`).join('L') +
+    'M' + [hp(-0.93, -0.1, 1.2), hp(-0.94, -0.1, 0.8), hp(-0.9, -0.1, 0.5)].map(([X, Y]) => `${n0(X)} ${n0(Y)}`).join('L')
+  return `<ellipse cx="${n0(HC.cx + 10)}" cy="${HC.gy + 2}" rx="150" ry="11" fill="#05070c" opacity="0.7"/>` +
+    `<path d="${farF}${farH}" fill="${FAR}"/>` +
+    `<path d="${sil}" fill="${COAT}"/>` +
+    blob('r-hlit', qx, qy, 46, 40, 0.8) + blob('r-hlit', sx2, sy2, 34, 36, 0.6) + blob('r-hlit', bx2, by2, 60, 16, 0.5) +
+    blob('r-hshade', ux, uy, 80, 18, 0.8) + blob('r-hshade', gx, gy2, 26, 30, 0.6) +
+    `<path d="${lines}" fill="none" stroke="#24140c" stroke-width="2.4" opacity="0.5" stroke-linecap="round"/>` +
+    `<path d="${lowF}${lowH}" fill="${DARK}"/><path d="${hooves}" fill="#070403"/>` +
+    `<path d="${back}" fill="none" stroke="${RIM}" stroke-width="1.8" opacity="0.5"/>` +
+    `<g>${swish}<path d="${tailD}" fill="#0e0806"/><path d="${hairs}" fill="none" stroke="#2a1810" stroke-width="1.4"/></g>` +
+    SADDLE +
+    poses
+}
+
 
 // ---------------------------------------------------------------- wildlife
 
@@ -520,7 +775,7 @@ function fire() {
     const dx = (rng() - 0.5) * 60
     const h = 80 + rng() * 120
     const begin = -Math.round(rng() * dur * 24) / 24
-    sparks += `<circle r="1.4" fill="#ffd37a">${ticked('transform', 'translate', dur, 1, (u) => `${n1(x + dx * u + Math.sin(u * 9) * 4)} ${n1(y - 30 - h * u)}`, begin)}${ticked('opacity', '', dur, 1, (u) => n2(1 - u), begin)}</circle>`
+    sparks += `<circle r="1.4" fill="#ffd37a">${ticked('transform', 'translate', dur, 2, (u) => `${n1(x + dx * u + Math.sin(u * 9) * 4)} ${n1(y - 30 - h * u)}`, begin)}${ticked('opacity', '', dur, 2, (u) => n2(1 - u), begin)}</circle>`
   }
   // Stones round the fire, an ellipse of them, each lit on its top.
   let stones = ''
@@ -647,6 +902,8 @@ export function buildScene() {
     <radialGradient id="r-steam"><stop offset="0" stop-color="#b8b4cc" stop-opacity="0.9"/><stop offset="1" stop-color="#b8b4cc" stop-opacity="0"/></radialGradient>
     <linearGradient id="r-lamp" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffe6a0" stop-opacity="0.7"/><stop offset="1" stop-color="#ffe6a0" stop-opacity="0"/></linearGradient>
     <radialGradient id="r-milk"><stop offset="0" stop-color="#9aa0d8" stop-opacity="0.35"/><stop offset="1" stop-color="#9aa0d8" stop-opacity="0"/></radialGradient>
+    <radialGradient id="r-hlit"><stop offset="0" stop-color="#7a4e30" stop-opacity="0.9"/><stop offset="1" stop-color="#7a4e30" stop-opacity="0"/></radialGradient>
+    <radialGradient id="r-hshade"><stop offset="0" stop-color="#160c06" stop-opacity="0.8"/><stop offset="1" stop-color="#160c06" stop-opacity="0"/></radialGradient>
     <radialGradient id="r-mist"><stop offset="0" stop-color="#9a94b8" stop-opacity="0.6"/><stop offset="1" stop-color="#9a94b8" stop-opacity="0"/></radialGradient>
     <radialGradient id="r-fly"><stop offset="0" stop-color="#f8f0a0" stop-opacity="0.7"/><stop offset="1" stop-color="#f8f0a0" stop-opacity="0"/></radialGradient>
   </defs>
