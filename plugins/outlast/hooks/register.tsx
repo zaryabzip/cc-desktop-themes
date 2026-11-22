@@ -44,7 +44,7 @@ function inStep(svg: string, nowMs: number): string {
 
 const LOOK: ThemeSetArgs = {
   colors: theme,
-  backdrop: { scene: SCENE_NAME, glass: { blur: 0, opacity: 0 } },
+  backdrop: { scene: SCENE_NAME, glass: { blur: 2, tint: '#3aff6a', opacity: 0.15 } },
 }
 
 export const register: Register = on => {
